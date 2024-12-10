@@ -4,6 +4,7 @@
 #include <thread>
 
 #include <vsomeip/vsomeip.hpp>
+#include <sd_overall.pb.h>
 
 #define SAMPLE_SERVICE_ID 0x1234
 #define SAMPLE_INSTANCE_ID 0x5678
@@ -14,6 +15,9 @@ std::shared_ptr<vsomeip::application> app;
 #define SAMPLE_EVENTGROUP_ID 0x4465
 #define SAMPLE_EVENT_ID 0x8778
 std::shared_ptr<vsomeip::payload> payload;
+
+
+using namespace xpilot::sr2_0::proto;
 
 void run() {
 
@@ -96,6 +100,13 @@ void on_message(const std::shared_ptr<vsomeip::message> &_request) {
 
 int main() {
 
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    SDOverallMsg newSDOverallMsg;
+    LocalPoseInfoMsg* newLocalPoseInfoMsg;
+
+    newLocalPoseInfoMsg->set_timestamp(10000);
+    newSDOverallMsg.set_allocated_localpose_msg(newLocalPoseInfoMsg);
+
     app = vsomeip::runtime::get()->create_application("World");
     app->init();
     app->register_message_handler(SAMPLE_SERVICE_ID, SAMPLE_INSTANCE_ID, SAMPLE_METHOD_ID, on_message);
@@ -103,11 +114,20 @@ int main() {
 
     const vsomeip::byte_t its_data[] = { 0x10 };
     payload = vsomeip::runtime::get()->create_payload();
-    payload->set_data(its_data, sizeof(its_data));
+
+    std::string serialized_data;
+    if (!newSDOverallMsg.SerializeToString(&serialized_data)) {
+        std::cerr << "Failed to serialize Protobuf message." << std::endl;
+        return 0;
+    }
+    payload->set_data(std::vector<vsomeip::byte_t>(serialized_data.begin(), serialized_data.end()));
+    // payload->set_data(its_data, sizeof(its_data));
 
     std::set<vsomeip::eventgroup_t> its_groups;
     its_groups.insert(SAMPLE_EVENTGROUP_ID);
     app->offer_event(SAMPLE_SERVICE_ID, SAMPLE_INSTANCE_ID, SAMPLE_EVENT_ID, its_groups);
     std::thread sender(run);
     app->start();
+
+    return 0;
 }
