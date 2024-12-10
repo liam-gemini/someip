@@ -19,5 +19,5 @@ include_directories (
 add_executable(service-example ../src/service-example-rr.cpp)
 target_link_libraries(service-example vsomeip3 ${Boost_LIBRARIES})
 
-add_executable(client-example ../src/client-example-rr.cpp)
-target_link_libraries(client-example vsomeip3 ${Boost_LIBRARIES})
+# add_executable(client-example ../src/client-example-rr.cpp)
+# target_link_libraries(client-example vsomeip3 ${Boost_LIBRARIES})
