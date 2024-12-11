@@ -21,52 +21,9 @@ using namespace xpilot::sr2_0::proto;
 
 void run() {
 
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
     std::cout << "--------------------------------------------------------------" << std::endl;
     app->notify(SAMPLE_SERVICE_ID, SAMPLE_INSTANCE_ID, SAMPLE_EVENT_ID, payload);
-
-/*
-    int i = 0;
-    while(true)
-    {
-        i++;
-        if(i>=1000000)
-        {
-            break;
-        }
-    }
-
-  std::unique_lock<std::mutex> its_lock(mutex);
-  std::cout << "-------before wait" << std::endl;
-  condition.wait(its_lock);
-  std::cout << "-------after wait" << std::endl;
-  std::shared_ptr< vsomeip::message > request;
-  request = vsomeip::runtime::get()->create_request();
-  request->set_service(SAMPLE_SERVICE_ID);
-  request->set_instance(SAMPLE_INSTANCE_ID);
-  request->set_method(SAMPLE_METHOD_ID);
-
-  std::shared_ptr< vsomeip::payload > its_payload = vsomeip::runtime::get()->create_payload();
-  std::vector< vsomeip::byte_t > its_payload_data;
-  for (vsomeip::byte_t i=0; i<10; i++) {
-      its_payload_data.push_back(i % 256);
-  }
-  its_payload->set_data(its_payload_data);
-  request->set_payload(its_payload);
-  app->send(request);
-
-   int i = 0;
-    while(true)
-    {
-        i++;
-        if(i>=1000000000)
-        {
-            break;
-        }
-    }
-
-*/
-
 }
 
 void on_message(const std::shared_ptr<vsomeip::message> &_request) {
