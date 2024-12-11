@@ -4,7 +4,8 @@
 #include <thread>
 
 #include <vsomeip/vsomeip.hpp>
-#include <sd_overall.pb.h>
+#include "sd_overall.pb.h"
+#include "serialization/serialize_json.h"
 
 using namespace xpilot::sr2_0::proto;
 using namespace std;
@@ -61,10 +62,6 @@ int main() {
     // Construct Message
     // SDOverallMsg
     SDOverallMsg newSDOverallMsg;
-    // SDOverallMsg.LocalPoseInfoMsg
-    LocalPoseInfoMsg* newLocalPoseInfoMsg = newSDOverallMsg.mutable_localpose_msg();
-    // SDOverallMsg.LocalPoseInfoMsg.timestamp
-    newLocalPoseInfoMsg->set_timestamp(10000);
 
     app = vsomeip::runtime::get()->create_application("World");
     app->init();
@@ -72,12 +69,10 @@ int main() {
     app->offer_service(SAMPLE_SERVICE_ID, SAMPLE_INSTANCE_ID);
 
     payload = vsomeip::runtime::get()->create_payload();
-
+    
     string serialized_data;
-    if (!newSDOverallMsg.SerializeToString(&serialized_data)) {
-        cerr << "Failed to serialize Protobuf message." << endl;
-        return 0;
-    }
+    auto result = serialize_json("test.json", &newSDOverallMsg, &serialized_data);
+
     cout << "===============" << newSDOverallMsg.DebugString() << endl;
     payload->set_data(vector<vsomeip::byte_t>(serialized_data.begin(), serialized_data.end()));
 

@@ -36,6 +36,7 @@ include_directories (
 
 add_executable(service-example 
     ${SRC_DIR}/service-example-rr.cpp
+    ${SRC_DIR}/serialization/serialize_json.cpp
     ${PROTO_SOURCES}
     )
 
