@@ -14,7 +14,7 @@ std::shared_ptr< vsomeip::application > app;
 std::mutex mutex;
 std::condition_variable condition;
 
-void run() {
+void run(){
 
     std::unique_lock<std::mutex> its_lock(mutex);
     condition.wait(its_lock);
@@ -62,15 +62,14 @@ void on_availability(vsomeip::service_t _service, vsomeip::instance_t _instance,
     
 }
 
-int main() {
-
+int main(){
     app = vsomeip::runtime::get()->create_application("client");
     app->init();
     app->register_availability_handler(SR_SERVICE_ID, SR_INSTANCE_ID , on_availability);
     app->request_service(SR_SERVICE_ID, SR_INSTANCE_ID );
     app->register_message_handler(vsomeip::ANY_SERVICE, vsomeip::ANY_INSTANCE, vsomeip::ANY_METHOD, on_message);
-
     std::thread sender(run);
     app->start();
-    
+
+    return 0;
 }
