@@ -10,6 +10,11 @@
 #define SR_EVENTGROUP_ID 0x0001
 #define AP_SR_PERIOD_DATA_EVENT_ID 0x8002
 
+#define SD_SERVICE_ID 0x4011
+#define SD_INSTANCE_ID 0x0001
+#define SD_EVENTGROUP_ID 0x0001
+#define SD_PERIOD_DATA_EVENT_ID 0x8002
+
 std::shared_ptr< vsomeip::application > app;
 std::mutex mutex;
 std::condition_variable condition;
@@ -19,10 +24,15 @@ void run(){
     std::unique_lock<std::mutex> its_lock(mutex);
     condition.wait(its_lock);
 
-    std::set<vsomeip::eventgroup_t> its_groups;
-    its_groups.insert(SR_EVENTGROUP_ID);
-    app->request_event(SR_SERVICE_ID, SR_INSTANCE_ID , AP_SR_PERIOD_DATA_EVENT_ID, its_groups);
+    std::set<vsomeip::eventgroup_t> sr_event_groups;
+    sr_event_groups.insert(SR_EVENTGROUP_ID);
+    app->request_event(SR_SERVICE_ID, SR_INSTANCE_ID , AP_SR_PERIOD_DATA_EVENT_ID, sr_event_groups);
     app->subscribe(SR_SERVICE_ID, SR_INSTANCE_ID , SR_EVENTGROUP_ID);
+
+    std::set<vsomeip::eventgroup_t> sd_event_groups;
+    sd_event_groups.insert(SD_EVENTGROUP_ID);
+    app->request_event(SD_SERVICE_ID, SD_INSTANCE_ID , SD_PERIOD_DATA_EVENT_ID, sd_event_groups);
+    app->subscribe(SD_SERVICE_ID, SD_INSTANCE_ID , SD_EVENTGROUP_ID);
 }
 
 void on_message(const std::shared_ptr<vsomeip::message> &_response) {
@@ -66,7 +76,9 @@ int main(){
     app = vsomeip::runtime::get()->create_application("client");
     app->init();
     app->register_availability_handler(SR_SERVICE_ID, SR_INSTANCE_ID , on_availability);
-    app->request_service(SR_SERVICE_ID, SR_INSTANCE_ID );
+    app->request_service(SR_SERVICE_ID, SR_INSTANCE_ID);
+    app->register_availability_handler(SD_SERVICE_ID, SD_INSTANCE_ID , on_availability);
+    app->request_service(SD_SERVICE_ID, SD_INSTANCE_ID );
     app->register_message_handler(vsomeip::ANY_SERVICE, vsomeip::ANY_INSTANCE, vsomeip::ANY_METHOD, on_message);
     std::thread sender(run);
     app->start();
