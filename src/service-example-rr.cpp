@@ -5,54 +5,30 @@
 
 #include <vsomeip/vsomeip.hpp>
 #include "sd_overall.pb.h"
+#include "proto_ap/WM_display_realtime.pb.h"
 #include "serialization/serialize_json.h"
 
 using namespace xpilot::sr2_0::proto;
+using namespace SRprotobuf;
 using namespace std;
 
-#define SAMPLE_SERVICE_ID 0x1234
-#define SAMPLE_INSTANCE_ID 0x5678
-#define SAMPLE_METHOD_ID 0x0421
-#define SAMPLE_EVENTGROUP_ID 0x4465
-#define SAMPLE_EVENT_ID 0x8778
+#define SR_SERVICE_ID 0x4010
+#define SR_INSTANCE_ID 0x0001
+#define SR_EVENT_GROUP_ID 0x0001
+#define AP_SR_PERIOD_DATA_EVENT_ID 0x8002
 
 shared_ptr<vsomeip::application> app;
-shared_ptr<vsomeip::payload> payload;
+shared_ptr<vsomeip::payload> ap_driving_data_payload;
 
 void run() {
 
-    this_thread::sleep_for(chrono::milliseconds(50));
-    cout << "--------------------------------------------------------------" << endl;
-    app->notify(SAMPLE_SERVICE_ID, SAMPLE_INSTANCE_ID, SAMPLE_EVENT_ID, payload);
+    this_thread::sleep_for(chrono::milliseconds(1000));
+    cout << "Server: sending a notification..." << endl;
+    app->notify(SR_SERVICE_ID, SR_INSTANCE_ID, AP_SR_PERIOD_DATA_EVENT_ID, ap_driving_data_payload);
 }
 
 void on_message(const shared_ptr<vsomeip::message> &_request) {
 
-    shared_ptr<vsomeip::payload> its_payload = _request->get_payload();
-    vsomeip::length_t l = its_payload->get_length();
-
-    // Get payload
-    stringstream ss;
-    for (vsomeip::length_t i=0; i<l; i++) {
-       ss << setw(2) << setfill('0') << hex
-          << (int)*(its_payload->get_data()+i) << " ";
-    }
-
-    cout << "SERVICE: Received message with Client/Session ["
-        << setw(4) << setfill('0') << hex << _request->get_client() << "/"
-        << setw(4) << setfill('0') << hex << _request->get_session() << "] "
-        << ss.str() << endl;
-
-    // Create response
-    shared_ptr<vsomeip::message> its_response = vsomeip::runtime::get()->create_response(_request);
-    its_payload = vsomeip::runtime::get()->create_payload();
-    vector<vsomeip::byte_t> its_payload_data;
-    for (int i=9; i>=0; i--) {
-        its_payload_data.push_back(i % 256);
-    }
-    its_payload->set_data(its_payload_data);
-    its_response->set_payload(its_payload);
-    app->send(its_response);
 }
 
 int main() {
@@ -61,24 +37,27 @@ int main() {
 
     // Construct Message
     // SDOverallMsg
-    SDOverallMsg newSDOverallMsg;
+    SDOverallMsg sd_overall_msg;
+    ApDrivingData ap_driving_data;
 
     app = vsomeip::runtime::get()->create_application("World");
     app->init();
-    app->register_message_handler(SAMPLE_SERVICE_ID, SAMPLE_INSTANCE_ID, SAMPLE_METHOD_ID, on_message);
-    app->offer_service(SAMPLE_SERVICE_ID, SAMPLE_INSTANCE_ID);
+    // app->register_message_handler(SAMPLE_SERVICE_ID, SAMPLE_INSTANCE_ID, SAMPLE_METHOD_ID, on_message);
+    app->offer_service(SR_SERVICE_ID, SR_INSTANCE_ID);
 
-    payload = vsomeip::runtime::get()->create_payload();
+    ap_driving_data_payload = vsomeip::runtime::get()->create_payload();
     
-    string serialized_data;
-    auto result = serialize_json("test.json", &newSDOverallMsg, &serialized_data);
+    string serialized_ap_driving_data;
+    auto result = serialize_json("../test/ap_sr_period_data.json", &ap_driving_data, &serialized_ap_driving_data);
 
-    cout << "===============" << newSDOverallMsg.DebugString() << endl;
-    payload->set_data(vector<vsomeip::byte_t>(serialized_data.begin(), serialized_data.end()));
+    cout << "|===========Message=========|" << endl; 
+    cout << ap_driving_data.DebugString() << endl;
+    cout << "|===========Message=========|" << endl; 
+    ap_driving_data_payload->set_data(vector<vsomeip::byte_t>(serialized_ap_driving_data.begin(), serialized_ap_driving_data.end()));
 
     set<vsomeip::eventgroup_t> its_groups;
-    its_groups.insert(SAMPLE_EVENTGROUP_ID);
-    app->offer_event(SAMPLE_SERVICE_ID, SAMPLE_INSTANCE_ID, SAMPLE_EVENT_ID, its_groups);
+    its_groups.insert(SR_EVENT_GROUP_ID);
+    app->offer_event(SR_SERVICE_ID, SR_INSTANCE_ID, AP_SR_PERIOD_DATA_EVENT_ID, its_groups);
     thread sender(run);
     app->start();
 
