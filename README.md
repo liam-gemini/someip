@@ -2,7 +2,8 @@
 - [Table of Contents](#table-of-contents)
 - [Diretory](#diretory)
 - [Build](#build)
-  - [Build](#build-1)
+  - [Build for x86](#build-for-x86)
+  - [Build for arm](#build-for-arm)
   - [Clean and build](#clean-and-build)
 - [Run](#run)
 
@@ -12,13 +13,17 @@
 + build: temperory build directory
 
 ## Build
-### Build
+### Build for x86
 ```bash
-./build.sh
+./build.sh x86
+```
+### Build for arm
+```bash
+./build.sh arm
 ```
 ### Clean and build
 ```bash
-./build.sh clean
+./build.sh x86 clean
 ```
 ## Run
 ```bash

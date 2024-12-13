@@ -1,10 +1,8 @@
 cmake_minimum_required (VERSION 3.13)
 
 project(service-example LANGUAGES CXX)
-# project(client-example LANGUAGES CXX)
 
-
-set(CMAKE_CXX_FLAGS "-g -std=c++0x")
+# set(CMAKE_CXX_FLAGS "-g -std=c++0x")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 find_package(vsomeip3 REQUIRED)
