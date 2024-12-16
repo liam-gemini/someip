@@ -41,8 +41,8 @@ case "$ARCH" in
         CMAKE_C_COMPILER="gcc"
         ;;
     arm)
-        CMAKE_CXX_COMPILER="arm-linux-gnueabi-g++"
-        CMAKE_C_COMPILER="arm-linux-gnueabi-gcc"
+        CMAKE_TOOLCHAIN_FILE="/home/gf/weizhe/j3_platform_build/toolchain.cmake"
+        ME_SDK="/home/gf/weizhe/j3_platform_build"
         ;;
     *)
         echo "Unsupported architecture: $1"
@@ -73,6 +73,8 @@ cd $BUILD_DIR
 cmake .. \
     -DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER \
     -DCMAKE_C_COMPILER=$CMAKE_C_COMPILER \
+    -DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE \
+    -DME_SDK=$ME_SDK \
     -DENABLE_UT=$ENABLE_UT \
     -DENABLE_ST=$ENABLE_ST
 

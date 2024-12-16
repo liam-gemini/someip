@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.13)
-
+include("${CMAKE_TOOLCHAIN_FILE}")
 project(service-example LANGUAGES CXX)
 
 # set(CMAKE_CXX_FLAGS "-g -std=c++0x")
